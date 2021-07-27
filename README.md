@@ -33,15 +33,15 @@ note = {unpublished},
 }
 ```
 
-Our work is released under liberal licenses (code: [MIT](LICENSE), data: [CC-BY](https://creativecommons.org/licenses/by/2.0/). We're happy for others to build on it; refactoring the scatterplot scripts is particularly welcome.
+Our work is released under liberal licenses (code: [MIT](LICENSE), data: [CC-BY](https://creativecommons.org/licenses/by/2.0/)). We're happy for others to build on it; refactoring the scatterplot scripts is particularly welcome.
 
 
 Comprehensive UMAPs and plots generated for the paper can be downloaded at the Zenodo link above. Our results can be fully reproduced following the steps detailed below. The data pipeline can be summarized as follows:
 
 1. Collect WAV audio datasets. In this case we have 3 (DCASE, AudioSet and Fraunhofer).
-2. Compute the log-STFT, log-mel spectrograms and L3 embeddings and save as HDF5 datasets (performed by the `00...` python scripts)
-3. Compute the UMAPs and save as HDF5 datasets (performed by the `01...` python script)
-4. Render scatter plots for section, device and global scopes (performed by the `02...` python scripts)
+2. Compute the log-STFT, log-mel spectrograms and L3 embeddings and save as HDF5 datasets (performed by the `00...` Python scripts)
+3. Compute the UMAPs and save as HDF5 datasets (performed by the `01...` Python script)
+4. Render scatter plots for section, device and global scopes (performed by the `02...` Python scripts)
 
 We also included the `03...` scripts used to render the plots in the paper.
 Note that step 2 requires a fair amount of disk memory and time. The L3 embeddings can also take a while to compute. Step 3 is very RAM-hungry and potentially slow.
@@ -63,7 +63,7 @@ logs
 ### Datasets:
 
 
-* **AudioSet**: Download our [custom AudioSet subset](https://zenodo.org/record/5123024/files/AudioSet_wav_fragments.zip?download=1) and extract its 39437 WAV files into `datasets/AudioSet_fragments`
+* **AudioSet**: Download our custom [AudioSet](https://zenodo.org/record/5123024/files/AudioSet_wav_fragments.zip?download=1) subset and extract its 39437 WAV files into `datasets/AudioSet_fragments`
 * **Fraunhofer**: Download from [here](https://www.idmt.fraunhofer.de/en/publications/isa-electric-engine.html) and extract into `datasets/IDMT-ISA-ELECTRIC-ENGINE`. It should end up with the following structure:
 
 ```
