@@ -400,14 +400,24 @@ ax_l.set_ylim(down, top)
 ax_l.set_xlim(left, right)
 
 
+# # QUICKFIX
+# Add border to regions 1 and 3
+LINE_1 = ((17.8, 18.3), (-2.7, -2.3))
+LINE_3 = ((16.14, 16.5), (-2.82, -2.62))
+ax_l.plot(LINE_1[0], LINE_1[1], "--", c="black")
+ax_r.plot(LINE_1[0], LINE_1[1], "--", c="black")
+ax_l.plot(LINE_3[0], LINE_3[1], "--", c="black")
+ax_r.plot(LINE_3[0], LINE_3[1], "--", c="black")
 
-# quickfix: add numbers at specific locations and add explanations in legend
+# add numbers at specific locations and add explanations in legend
 FONTSIZE = 30
 FONTWEIGHT = 600 # 0-1000
 SIGNAL_1 = (18.05, -2.42, "1")
-SIGNAL_2 = (17.85, -2.0, "2")
-SIGNAL_3 = (17.2, -3.1, "3")
-SIGNAL_4 = (16.35, -2.6, "4")
+SIGNAL_2 = (17.25, -2.5, "2")
+SIGNAL_3 = (16.25, -2.65, "3")
+ELLIPSE_1 = (18.1, -2.5, 0.7, 0.4)
+ELLIPSE_2 = (17.30, -2.45, 0.55, 0.55)
+ELLIPSE_3 = (16.30, -2.70, 0.35, 0.35)
 # Add numbers to plots
 ax_l.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
 ax_r.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
@@ -415,11 +425,25 @@ ax_l.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
 ax_r.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
 ax_l.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
 ax_r.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
-ax_l.text(*SIGNAL_4, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
-ax_r.text(*SIGNAL_4, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+
+# Add ellipses to plots
+from matplotlib.patches import Ellipse
+
+ax_l.add_patch(Ellipse(xy=ELLIPSE_1[:2], width=ELLIPSE_1[2], height=ELLIPSE_1[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_1[:2], width=ELLIPSE_1[2], height=ELLIPSE_1[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_l.add_patch(Ellipse(xy=ELLIPSE_2[:2], width=ELLIPSE_2[2], height=ELLIPSE_2[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_2[:2], width=ELLIPSE_2[2], height=ELLIPSE_2[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_l.add_patch(Ellipse(xy=ELLIPSE_3[:2], width=ELLIPSE_3[2], height=ELLIPSE_3[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_3[:2], width=ELLIPSE_3[2], height=ELLIPSE_3[3],
+                  edgecolor="black", fc="none", lw=1))
+
+
 # Add number entries to legend
-
-
 str_handler = StrHandler(weight=FONTWEIGHT,
                          left_margin_ratio=0.95,
                          width_factor=CONF.LEGEND_WIDTH_FACTOR)
@@ -428,9 +452,10 @@ ax_r_labels.append("Good SEP/good DSUP")
 ax_r_handles.append("2")
 ax_r_labels.append("Bad SEP/bad DSUP (FNeg)")
 ax_r_handles.append("3")
-ax_r_labels.append("Bad SEP/bad DSUP (FPos)")
-ax_r_handles.append("4")
 ax_r_labels.append("Good SEP/bad DSUP (FPos+FNeg)")
+
+ax_r_handles.append("---")
+ax_r_labels.append("Possible discrimination boundary")
 
 
 ax_r.legend(ax_r_handles, ax_r_labels, handlelength=CONF.LEGEND_ICON_SIZE,
