@@ -409,15 +409,11 @@ pth="UMAP_modality=L3_splits=GLOBAL_stack=10_maxDcaseTrain=2000_maxDcaseTest=200
 ### Paper plots:
 
 ```
-# SEP/DSUP Example plot
-python 03d_sep_dsup_example_plot.py FIG_LEGEND_POS=1.01 SAVEFIG_PATH=umap_plots/sep_dsup_example.png
-
+# Mel pump stack 5 excerpt
+pth=UMAP_modality=mel_splits=pump_stack=5_maxDcaseTrain=10000_maxDcaseTest=20000_maxAudioset=10000_maxFraunhofer=10000.pickle; python 03f_single_device_plot_paper_explanatory.py PLOT_AUDIOSET=false PLOT_FRAUNHOFER=false WITH_CROSS=false DEVICE=pump DEVICE_UMAP_PATH=umaps/${pth} CUT_TOP=0.597 CUT_LEFT=0.807 CUT_BOTTOM=0.33 CUT_RIGHT=0.095 FIG_MARGIN_RIGHT=0.7 FIG_LEGEND_POS=0.89 SAVEFIG_PATH=umap_plots/${pth}_device_plot_paper.png DCASE_SHADOW_SIZE=60 DOT_SIZE=20 LEGEND_WIDTH_FACTOR=1.5 LEGEND_FONT_SIZE=31
 
 # Global STFT plot
 pth="UMAP_modality=stft_splits=GLOBAL_stack=10_maxDcaseTrain=2000_maxDcaseTest=2000_maxAudioset=1_maxFraunhofer=1.pickle"; python 03c_global_plot_paper.py GLOBAL_UMAP_PATH=umaps/${pth} PLOT_LEGEND=true PLOT_AUDIOSET=false PLOT_FRAUNHOFER=false SAVEFIG_PATH=umap_plots/${pth}_global_paper.png
-
-# Mel pump stack 5 excerpt
-pth=UMAP_modality=mel_splits=pump_stack=5_maxDcaseTrain=10000_maxDcaseTest=20000_maxAudioset=10000_maxFraunhofer=10000.pickle; python 03b_single_device_plot_paper.py PLOT_AUDIOSET=false PLOT_FRAUNHOFER=false WITH_CROSS=false DEVICE=pump DEVICE_UMAP_PATH=umaps/${pth} CUT_TOP=0.588 CUT_LEFT=0.7 CUT_BOTTOM=0.17 CUT_RIGHT=0.1 FIG_MARGIN_RIGHT=0.7 FIG_LEGEND_POS=0.95 SAVEFIG_PATH=umap_plots/${pth}_device_plot_paper.png
 
 # L3 ToyCar stack 1 device
 pth=UMAP_modality=l3_splits=ToyCar_stack=1_maxDcaseTrain=10000_maxDcaseTest=20000_maxAudioset=10000_maxFraunhofer=10000.pickle; python 03b_single_device_plot_paper.py PLOT_AUDIOSET=false PLOT_FRAUNHOFER=false WITH_CROSS=false DEVICE=ToyCar DEVICE_UMAP_PATH=umaps/${pth} CUT_TOP=0.05 CUT_LEFT=0.06 CUT_BOTTOM=0.04 CUT_RIGHT=0 FIG_MARGIN_RIGHT=0.7 FIG_LEGEND_POS=0.82 SAVEFIG_PATH=umap_plots/${pth}_device_plot_paper.png

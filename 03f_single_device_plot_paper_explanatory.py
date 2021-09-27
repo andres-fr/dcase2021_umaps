@@ -22,7 +22,8 @@ from matplotlib.collections import PathCollection
 #
 from d2021umaps.data import ANOMALY_LABELS, get_umap_energies
 from d2021umaps.plots import shadow_dot_scatter
-from d2021umaps.plots import MulticolorCircles, MulticolorHandler
+from d2021umaps.plots import MulticolorCircles, MulticolorHandler, StrHandler
+
 
 # ##############################################################################
 # # GLOBALS
@@ -351,10 +352,12 @@ ax_r_labels.append(CONF.TRAIN_SOURCE_NORMAL_LABEL)
 ax_r_handles.append(MulticolorCircles(used_source_train_c,
                                       radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
                                       face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-ax_r_labels.append(CONF.TRAIN_TARGET_NORMAL_LABEL)
-ax_r_handles.append(MulticolorCircles(used_target_train_c,
-                                      radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
-                                      face_alpha=CONF.LEGEND_SHADOW_ALPHA))
+
+# # We omit in this plot the train/target legend because none is present
+# ax_r_labels.append(CONF.TRAIN_TARGET_NORMAL_LABEL)
+# ax_r_handles.append(MulticolorCircles(
+#     used_target_train_c, radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
+#     face_alpha=CONF.LEGEND_SHADOW_ALPHA))
 
 ax_r_labels.append(CONF.TEST_SOURCE_NORMAL_LABEL)
 ax_r_handles.append(MulticolorCircles(
@@ -376,16 +379,10 @@ ax_r_handles.append(MulticolorCircles(
 #
 
 
-ax_r.legend(ax_r_handles, ax_r_labels, handlelength=CONF.LEGEND_ICON_SIZE,
-            borderpad=1, labelspacing=1,
-            bbox_to_anchor=FIG_BBOX,
-            loc=FIG_LOC,
-            prop={'size': CONF.LEGEND_FONT_SIZE},
-            handler_map={MulticolorCircles: mc_handler})
-
 
 ax_l.set_aspect("equal")
 ax_r.set_aspect("equal")
+
 
 
 # trim view
@@ -401,6 +398,49 @@ down += vert_dist * CONF.CUT_BOTTOM
 #
 ax_l.set_ylim(down, top)
 ax_l.set_xlim(left, right)
+
+
+
+# quickfix: add numbers at specific locations and add explanations in legend
+FONTSIZE = 30
+FONTWEIGHT = 600 # 0-1000
+SIGNAL_1 = (18.05, -2.42, "1")
+SIGNAL_2 = (17.85, -2.0, "2")
+SIGNAL_3 = (17.2, -3.1, "3")
+SIGNAL_4 = (16.35, -2.6, "4")
+# Add numbers to plots
+ax_l.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_l.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_l.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_l.text(*SIGNAL_4, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_4, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+# Add number entries to legend
+
+
+str_handler = StrHandler(weight=FONTWEIGHT,
+                         left_margin_ratio=0.95,
+                         width_factor=CONF.LEGEND_WIDTH_FACTOR)
+ax_r_handles.append("1")
+ax_r_labels.append("Good SEP/good DSUP")
+ax_r_handles.append("2")
+ax_r_labels.append("Bad SEP/bad DSUP (FNeg)")
+ax_r_handles.append("3")
+ax_r_labels.append("Bad SEP/bad DSUP (FPos)")
+ax_r_handles.append("4")
+ax_r_labels.append("Good SEP/bad DSUP (FPos+FNeg)")
+
+
+ax_r.legend(ax_r_handles, ax_r_labels, handlelength=CONF.LEGEND_ICON_SIZE,
+            borderpad=1, labelspacing=1,
+            bbox_to_anchor=FIG_BBOX,
+            loc=FIG_LOC,
+            prop={'size': CONF.LEGEND_FONT_SIZE},
+            handler_map={MulticolorCircles: mc_handler, str: str_handler})
+
+
 
 fig.subplots_adjust(top=0.99, bottom=0.01, left=0.01,
                     right=CONF.FIG_MARGIN_RIGHT,

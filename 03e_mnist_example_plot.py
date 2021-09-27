@@ -34,7 +34,7 @@ COLORS = sns.color_palette()
 SURFACE = 1.0
 LEGEND_ICON_SIZE = 17
 LEGEND_FONT_SIZE = 20
-BG_COLOR = (0.89, 0.92, 0.94)  # rgb
+BG_COLOR = (0.975, 0.985, 1)  # rgb
 SAVEPATH = os.path.join("umap_plots", "mnist.png")
 DPI = 300
 
