@@ -19,13 +19,13 @@ Andres Fernandez and Mark D. Plumbley 2021
 You can cite our work as follows:
 
 ```
-@unpublished{afr2021umap,
-author = {Fernandez, Andres and Plumbley, Mark D.},
-title = {Using {UMAP} to Inspect Audio Data for
-Unsupervised Anomaly Detection under Domain-Shift
-Conditions},
-year = {2021},
-note = {unpublished},
+@inproceedings{aferro2021umap,
+  author = {Fernandez, Andres and Plumbley, Mark D.},
+  title = {Using {UMAP} to Inspect Audio Data for Unsupervised Anomaly Detection under Domain-Shift Conditions},
+  booktitle = "Proceedings of the Detection and Classification of Acoustic Scenes and Events 2021 Workshop ({DCASE2021})",
+  address = "Barcelona, Spain",
+  month = "November",
+  year = "2021",
 }
 ```
 
