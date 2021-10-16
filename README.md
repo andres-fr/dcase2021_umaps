@@ -8,10 +8,6 @@
 
 ![](assets/global_mel10.jpg)
 
-![](assets/EPSRC_logo.png)
-*Work supported by EPSRC grants EP/T019751/1 (AI for Sound) and EP/T022205/1 (JADE2 Tier 2 HPC facility)*
-
-
 -----
 
 
@@ -436,3 +432,8 @@ for i in umap_plots/*; do convert $i -trim $i; done
 # https://stackoverflow.com/questions/10225403/how-can-i-extract-a-good-quality-jpeg-image-from-a-video-file-with-ffmpeg/10234065#10234065
 for i in umap_plots/*; do ffmpeg -i $i -qscale:v 15 ${i/.png/.jpg}; done
 ```
+
+---
+
+<img src="assets/EPSRC_logo.png" alt="EPSRC logo" width="45%"/>
+*Work supported by EPSRC grants EP/T019751/1 (AI for Sound) and EP/T022205/1 (JADE2 Tier 2 HPC facility)*
