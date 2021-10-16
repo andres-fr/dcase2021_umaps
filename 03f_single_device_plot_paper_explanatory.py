@@ -3,10 +3,9 @@
 
 
 """
-Given a per-device UMAP, this script plots a dual scatterplot with the global
-DCASE dataset, and optionally the external datasets. Color code is by device
-and section. Shapes for source and target domain can be different (e.g.
-circle and triangle).
+Given a per-device UMAP, this script plots a dual scatterplot with
+info about the external datasets, training/test data, source/target domain,
+anomaly (right) vs. normal (left) sounds, and color-code by section+domain.
 """
 
 
@@ -16,12 +15,14 @@ import json
 #
 from omegaconf import OmegaConf
 import numpy as np
+from randomcolor import RandomColor
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib.collections import PathCollection
 #
 from d2021umaps.data import ANOMALY_LABELS, get_umap_energies
 from d2021umaps.plots import shadow_dot_scatter
-from d2021umaps.plots import MulticolorCircles, MulticolorHandler
+from d2021umaps.plots import MulticolorCircles, MulticolorHandler, StrHandler
 
 
 # ##############################################################################
@@ -80,12 +81,22 @@ CONF.LEGEND_DOT_EXTERNAL_RATIO = 1.7
 CONF.LEGEND_DOT_TRAIN_RATIO = 1.7
 CONF.LEGEND_DOT_TEST_RATIO = 1
 CONF.LEGEND_WIDTH_FACTOR = 2.0
-CONF.LEGEND_FONT_SIZE = 20
+CONF.LEGEND_FONT_SIZE = 35
 CONF.LEGEND_ICON_SIZE = None
-
+#
+CONF.CUT_TOP = 0.0
+CONF.CUT_BOTTOM = 0.0
+CONF.CUT_LEFT = 0.0
+CONF.CUT_RIGHT = 0.0
+#
+CONF.FIG_MARGIN_RIGHT = 0.99
+CONF.FIG_LEGEND_POS = None  # 0.65
 
 cli_conf = OmegaConf.from_cli()
 CONF = OmegaConf.merge(CONF, cli_conf)
+
+FIG_BBOX = (CONF.FIG_LEGEND_POS, 1) if CONF.FIG_LEGEND_POS is not None else None
+FIG_LOC = "upper left" if FIG_BBOX is not None else None
 
 assert CONF.DEVICE is not None, "Please specify the device being plotted"
 print(OmegaConf.to_yaml(CONF))
@@ -200,8 +211,8 @@ all_norm_source_c = []
 all_anom_source = []
 all_anom_source_c = []
 for (_, dev, sec, dom), v in test_source_umaps.items():
-    norm_color = CONF.DOT_COLORS["normal_source"][int(sec)]
-    anom_color = CONF.DOT_COLORS["anomaly_source"][int(sec)]
+    norm_color = CONF.DOT_COLORS["normal_source"][int(sec) + 2]
+    anom_color = CONF.DOT_COLORS["anomaly_source"][int(sec) + 2]
     labels = np.array([ANOMALY_LABELS[json.loads(s)["label"]]
                        for s in v["metadata"]])
     norm_idxs = np.where(labels == 0)[0]
@@ -276,7 +287,8 @@ if CONF.WITH_CROSS:
     # We want to signal a low-energy position with a cross, To have some sort of
     # idea for an origin. For that, we fetch the original frames. To prevent
     # outliers, we ignore lowest energies and average the rest (median may be risky)
-    energies = get_umap_energies(umap_data, devices=[CONF.DEVICE])
+    energies = get_umap_energies(umap_data, devices=[CONF.DEVICE],
+                                 sections=[CONF.SECTION])
     merged_energies_and_umaps = sum([list(zip(v, umap_data[k]["umaps"]))
                                      for k, v in energies.items()], [])
     umaps_by_energy = sorted(merged_energies_and_umaps, key=lambda elt: elt[0])
@@ -319,44 +331,6 @@ mc_handler = MulticolorHandler(width_factor=CONF.LEGEND_WIDTH_FACTOR)
 
 
 
-# Left plot legend
-ax_l_handles, ax_l_labels = ax_l.get_legend_handles_labels()
-if CONF.PLOT_AUDIOSET:
-    ax_l_labels.append(CONF.AUDIOSET_LABEL)
-    ax_l_handles.append(MulticolorCircles(
-        # Create "invisible" circles to adjust space
-        ["none", "none", "none", "none", "none", CONF.AUDIOSET_COLOR],
-        radius_factor=CONF.LEGEND_DOT_EXTERNAL_RATIO,
-        face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-if CONF.PLOT_FRAUNHOFER:
-    ax_l_labels.append(CONF.FRAUNHOFER_LABEL)
-    ax_l_handles.append(MulticolorCircles(
-        # Create "invisible" circles to adjust space
-        ["none", "none", "none", "none", "none", CONF.FRAUNHOFER_COLOR],
-        radius_factor=CONF.LEGEND_DOT_EXTERNAL_RATIO,
-        face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-ax_l_labels.append(CONF.TRAIN_SOURCE_NORMAL_LABEL)
-ax_l_handles.append(MulticolorCircles(used_source_train_c,
-                                      radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
-                                      face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-ax_l_labels.append(CONF.TRAIN_TARGET_NORMAL_LABEL)
-ax_l_handles.append(MulticolorCircles(used_target_train_c,
-                                      radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
-                                      face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-ax_l_labels.append(CONF.TEST_SOURCE_NORMAL_LABEL)
-ax_l_handles.append(MulticolorCircles(
-    ["none", "none", "none"] + used_norm_source_test_c,
-    radius_factor=CONF.LEGEND_DOT_TEST_RATIO))
-ax_l_labels.append(CONF.TEST_TARGET_NORMAL_LABEL)
-ax_l_handles.append(MulticolorCircles(
-    ["none", "none", "none"] + used_norm_target_test_c,
-    radius_factor=CONF.LEGEND_DOT_TEST_RATIO))
-#
-ax_l.legend(ax_l_handles, ax_l_labels, handlelength=CONF.LEGEND_ICON_SIZE,
-            borderpad=1, labelspacing=1,
-            prop={'size': CONF.LEGEND_FONT_SIZE},
-            handler_map={MulticolorCircles: mc_handler})
-
 
 # Right plot legend
 ax_r_handles, ax_r_labels = ax_r.get_legend_handles_labels()
@@ -378,10 +352,22 @@ ax_r_labels.append(CONF.TRAIN_SOURCE_NORMAL_LABEL)
 ax_r_handles.append(MulticolorCircles(used_source_train_c,
                                       radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
                                       face_alpha=CONF.LEGEND_SHADOW_ALPHA))
-ax_r_labels.append(CONF.TRAIN_TARGET_NORMAL_LABEL)
-ax_r_handles.append(MulticolorCircles(used_target_train_c,
-                                      radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
-                                      face_alpha=CONF.LEGEND_SHADOW_ALPHA))
+
+# # We omit in this plot the train/target legend because none is present
+# ax_r_labels.append(CONF.TRAIN_TARGET_NORMAL_LABEL)
+# ax_r_handles.append(MulticolorCircles(
+#     used_target_train_c, radius_factor=CONF.LEGEND_DOT_TRAIN_RATIO,
+#     face_alpha=CONF.LEGEND_SHADOW_ALPHA))
+
+ax_r_labels.append(CONF.TEST_SOURCE_NORMAL_LABEL)
+ax_r_handles.append(MulticolorCircles(
+    ["none", "none", "none"] + used_norm_source_test_c,
+    radius_factor=CONF.LEGEND_DOT_TEST_RATIO))
+ax_r_labels.append(CONF.TEST_TARGET_NORMAL_LABEL)
+ax_r_handles.append(MulticolorCircles(
+    ["none", "none", "none"] + used_norm_target_test_c,
+    radius_factor=CONF.LEGEND_DOT_TEST_RATIO))
+
 ax_r_labels.append(CONF.TEST_SOURCE_ANOMALY_LABEL)
 ax_r_handles.append(MulticolorCircles(
     ["none", "none", "none"] + used_anom_source_test_c,
@@ -391,15 +377,99 @@ ax_r_handles.append(MulticolorCircles(
     ["none", "none", "none"] + used_anom_target_test_c,
     radius_factor=CONF.LEGEND_DOT_TEST_RATIO))
 #
-ax_r.legend(ax_r_handles, ax_r_labels, handlelength=CONF.LEGEND_ICON_SIZE,
-            borderpad=1, labelspacing=1,
-            prop={'size': CONF.LEGEND_FONT_SIZE},
-            handler_map={MulticolorCircles: mc_handler})
+
+
 
 ax_l.set_aspect("equal")
 ax_r.set_aspect("equal")
-fig.subplots_adjust(top=0.99, bottom=0.01, left=0.01, right=0.99, hspace=0,
-                    wspace=0)
+
+
+
+# trim view
+left, right = ax_l.get_xlim()
+down, top = ax_l.get_ylim()
+horiz_dist = right - left
+vert_dist = top - down
+#
+left += horiz_dist * CONF.CUT_LEFT
+right -= horiz_dist * CONF.CUT_RIGHT
+top -= vert_dist * CONF.CUT_TOP
+down += vert_dist * CONF.CUT_BOTTOM
+#
+ax_l.set_ylim(down, top)
+ax_l.set_xlim(left, right)
+
+
+# # QUICKFIX
+# Add border to regions 1 and 3
+LINE_1 = ((17.8, 18.3), (-2.7, -2.3))
+LINE_3 = ((16.14, 16.5), (-2.82, -2.62))
+ax_l.plot(LINE_1[0], LINE_1[1], "--", c="black")
+ax_r.plot(LINE_1[0], LINE_1[1], "--", c="black")
+ax_l.plot(LINE_3[0], LINE_3[1], "--", c="black")
+ax_r.plot(LINE_3[0], LINE_3[1], "--", c="black")
+
+# add numbers at specific locations and add explanations in legend
+FONTSIZE = 30
+FONTWEIGHT = 600 # 0-1000
+SIGNAL_1 = (18.05, -2.42, "1")
+SIGNAL_2 = (17.25, -2.5, "2")
+SIGNAL_3 = (16.25, -2.65, "3")
+ELLIPSE_1 = (18.1, -2.5, 0.7, 0.4)
+ELLIPSE_2 = (17.30, -2.45, 0.55, 0.55)
+ELLIPSE_3 = (16.30, -2.70, 0.35, 0.35)
+# Add numbers to plots
+ax_l.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_1, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_l.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_2, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_l.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+ax_r.text(*SIGNAL_3, fontsize=FONTSIZE, fontweight=FONTWEIGHT)
+
+# Add ellipses to plots
+from matplotlib.patches import Ellipse
+
+ax_l.add_patch(Ellipse(xy=ELLIPSE_1[:2], width=ELLIPSE_1[2], height=ELLIPSE_1[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_1[:2], width=ELLIPSE_1[2], height=ELLIPSE_1[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_l.add_patch(Ellipse(xy=ELLIPSE_2[:2], width=ELLIPSE_2[2], height=ELLIPSE_2[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_2[:2], width=ELLIPSE_2[2], height=ELLIPSE_2[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_l.add_patch(Ellipse(xy=ELLIPSE_3[:2], width=ELLIPSE_3[2], height=ELLIPSE_3[3],
+                  edgecolor="black", fc="none", lw=1))
+ax_r.add_patch(Ellipse(xy=ELLIPSE_3[:2], width=ELLIPSE_3[2], height=ELLIPSE_3[3],
+                  edgecolor="black", fc="none", lw=1))
+
+
+# Add number entries to legend
+str_handler = StrHandler(weight=FONTWEIGHT,
+                         left_margin_ratio=0.95,
+                         width_factor=CONF.LEGEND_WIDTH_FACTOR)
+ax_r_handles.append("1")
+ax_r_labels.append("Good SEP/good DSUP")
+ax_r_handles.append("2")
+ax_r_labels.append("Bad SEP/bad DSUP (FNeg)")
+ax_r_handles.append("3")
+ax_r_labels.append("Good SEP/bad DSUP (FPos+FNeg)")
+
+ax_r_handles.append("---")
+ax_r_labels.append("Possible discrimination boundary")
+
+
+ax_r.legend(ax_r_handles, ax_r_labels, handlelength=CONF.LEGEND_ICON_SIZE,
+            borderpad=1, labelspacing=1,
+            bbox_to_anchor=FIG_BBOX,
+            loc=FIG_LOC,
+            prop={'size': CONF.LEGEND_FONT_SIZE},
+            handler_map={MulticolorCircles: mc_handler, str: str_handler})
+
+
+
+fig.subplots_adjust(top=0.99, bottom=0.01, left=0.01,
+                    right=CONF.FIG_MARGIN_RIGHT,
+                    hspace=0, wspace=0.01)
 
 if CONF.SAVEFIG_PATH is not None:
     fig.savefig(CONF.SAVEFIG_PATH, dpi=CONF.DPI)

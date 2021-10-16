@@ -42,7 +42,7 @@ CONF.ANOMALY_COLORS = ["lightcoral", "indianred", "orangered", "firebrick"]
 CONF.FIGSIZE = (20, 10)
 CONF.DPI = 300
 CONF.SAVEFIG_PATH = None
-CONF.BG_COLOR = (0.89, 0.92, 0.94)  # rgb
+CONF.BG_COLOR = (0.975, 0.985, 1)  # rgb
 #
 CONF.LEGEND_SHADOW_ALPHA = 0.5
 CONF.LEGEND_SHADOW_RATIO = 2

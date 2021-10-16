@@ -11,6 +11,7 @@ import random
 import numpy as np
 # import seaborn as sns
 import matplotlib.colors as mcolors
+import matplotlib.text as pltext
 from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt
 
@@ -259,3 +260,37 @@ class MulticolorHandler:
         patch = orig_handle(width, height)
         handlebox.add_artist(patch)
         return patch
+
+
+class StrHandler:
+    """
+    Allows to use ``str(o)`` for an arbitrary python object ``o``
+    as a legend handle. Modified from:
+    https://stackoverflow.com/a/27175052/4511978
+    """
+
+    def __init__(self, fontsize=16, weight=500, color="black", rotation=0,
+                 left_margin_ratio=0, width_factor=1):
+        """
+        """
+        self.fs = fontsize
+        self.weight = weight
+        self.color = color
+        self.rotation = rotation
+        self.lmargin = left_margin_ratio
+        self.w_factor = width_factor
+
+    def legend_artist(self, legend, orig_handle, fontsize, handlebox):
+        """
+        """
+        handlebox.set_width(handlebox.width * self.w_factor)
+        x0, y0 = handlebox.xdescent, handlebox.ydescent
+        width, height = handlebox.width, handlebox.height
+        x0 += width * self.lmargin
+        txt = pltext.Text(x0, y0, text=str(orig_handle),
+                          color=self.color, verticalalignment="baseline",
+                          horizontalalignment="right", multialignment=None,
+                          fontsize=fontsize, fontweight=self.weight,
+                          rotation=self.rotation)
+        handlebox.add_artist(txt)
+        return txt
